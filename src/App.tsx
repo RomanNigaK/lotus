@@ -1,24 +1,62 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React,{useEffect, useState} from 'react';
+import styled from 'styled-components';
+import { Routes,Route, useParams } from 'react-router';
+import Layout from './components/layout/Layout';
+import LayoutBid from './components/bid/Layoutbid';
+import GlobalStyles from './styles/global';
+import Container from './components/bid/container/Container';
+import Room from './components/bid/room/Room'
+import { useDispatch, useSelector } from 'react-redux';
+import { menuBid } from './redux/selectors';
+import { RootState, AppDispatch } from './redux/store';
+import { setTimer } from './redux/bidSlice';
+import { useAppDispatch } from './hooks';
+
+
+
 
 function App() {
+const bidMenu = useSelector((state:RootState) => menuBid(state));
+const [choise, setChoise] = useState(null);
+
+const dispatch = useAppDispatch();
+
+
+
+
+useEffect(()=>{
+  const timerMotion = setInterval(() => {
+    dispatch(setTimer())
+  }, 1000)
+  return(()=>clearInterval(timerMotion))
+})
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div>
+    
+
+      <Routes>
+        <Route path="/" element={<Layout/>}>
+            <Route path='bid/' element={<LayoutBid menuBid={bidMenu} choisePage={choise}/>}>
+                {
+                  bidMenu.map((e,i)=>{
+                    return(<>
+                      <Route 
+                        path={e.path} 
+                        element={<Container cbstate={setChoise} element={e.path}>{e.title}</Container>}/>
+                    </>)
+                  })
+                }
+              <Route index element={<Container />}/>
+              
+            </Route>
+            
+        </Route>
+        
+        <Route path="/room/:id" element={<Room/>}/>
+      </Routes>
+      
+      <GlobalStyles />
     </div>
   );
 }
